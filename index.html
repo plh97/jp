@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語50音自己テスト</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .question {
+            font-size: 48px;
+            margin: 20px;
+        }
+        .answer-input {
+            font-size: 24px;
+            padding: 10px;
+            margin: 10px;
+        }
+        .button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+        .result {
+            font-size: 24px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>50音自己テスト</h1>
+    <div class="question" id="question"></div>
+    <input type="text" class="answer-input" id="answer" placeholder="ローマ字で入力してください">
+    <br>
+    <button class="button" onclick="checkAnswer()">確認</button>
+    <button class="button" onclick="nextQuestion()">次の問題</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        const hiragana = [
+            'あ','い','う','え','お',
+            'か','き','く','け','こ',
+            'さ','し','す','せ','そ',
+            'た','ち','つ','て','と',
+            'な','に','ぬ','ね','の',
+            'は','ひ','ふ','へ','ほ',
+            'ま','み','む','め','も',
+            'や','ゆ','よ',
+            'ら','り','る','れ','ろ',
+            'わ','を','ん'
+        ];
+        
+        const romaji = [
+            'a','i','u','e','o',
+            'ka','ki','ku','ke','ko',
+            'sa','shi','su','se','so',
+            'ta','chi','tsu','te','to',
+            'na','ni','nu','ne','no',
+            'ha','hi','fu','he','ho',
+            'ma','mi','mu','me','mo',
+            'ya','yu','yo',
+            'ra','ri','ru','re','ro',
+            'wa','wo','n'
+        ];
+
+        let currentIndex;
+
+        function nextQuestion() {
+            document.getElementById('answer').value = '';
+            document.getElementById('result').textContent = '';
+            currentIndex = Math.floor(Math.random() * hiragana.length);
+            document.getElementById('question').textContent = hiragana[currentIndex];
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.toLowerCase();
+            const correctAnswer = romaji[currentIndex];
+            
+            if(userAnswer === correctAnswer) {
+                document.getElementById('result').textContent = '正解！';
+                document.getElementById('result').style.color = 'green';
+            } else {
+                document.getElementById('result').textContent = `不正解。正解は ${correctAnswer} です。`;
+                document.getElementById('result').style.color = 'red';
+            }
+        }
+
+        // 最初の問題を表示
+        nextQuestion();
+    </script>
+</body>
+</html>
