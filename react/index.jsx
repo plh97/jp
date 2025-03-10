@@ -209,5 +209,7 @@ const App = () => {
     );
 };
 
+
 // Render the app
-ReactDOM.render(<App />, document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')); // createRoot(container!) if you use TypeScript
+root.render(<App tab="home" />);
