@@ -1,0 +1,23 @@
+{
+  "name": "cursor",
+  "version": "1.0.0",
+  "description": "一个简单的平假名练习应用，帮助用户学习日语平假名。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plh97/cursor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/plh97/cursor/issues"
+  },
+  "homepage": "https://github.com/plh97/cursor#readme",
+  "dependencies": {
+    "vite": "^6.2.1"
+  }
+}
