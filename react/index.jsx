@@ -140,7 +140,7 @@ const App = () => {
             record.correct = true;
             setCorrectAnswers(prev => prev + 1);
         }
-        if (correctAnswers + 1 === totalQuestions) {
+        if (correctAnswers === totalQuestions) {
             setShowWinMessage(true);
         }
     };
