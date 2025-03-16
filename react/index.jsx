@@ -1,6 +1,6 @@
 const { useState, useEffect, useRef } = React;
 
-// Hiragana Data Model (unchanged from original)
+// Hiragana and Katakana Data Models
 const hiraganaData = {
     hiragana: [
         ['あ', 'い', 'う', 'え', 'お'],
@@ -28,11 +28,38 @@ const hiraganaData = {
     ]
 };
 
+const katakanaData = {
+    katakana: [
+        ['ア', 'イ', 'ウ', 'エ', 'オ'],
+        ['カ', 'キ', 'ク', 'ケ', 'コ'],
+        ['サ', 'シ', 'ス', 'セ', 'ソ'],
+        ['タ', 'チ', 'ツ', 'テ', 'ト'],
+        ['ナ', 'ニ', 'ヌ', 'ネ', 'ノ'],
+        ['ハ', 'ヒ', 'フ', 'ヘ', 'ホ'],
+        ['マ', 'ミ', 'ム', 'メ', 'モ'],
+        ['ヤ', 'ユ', 'ヨ'],
+        ['ラ', 'リ', 'ル', 'レ', 'ロ'],
+        ['ワ', 'ヲ', 'ン']
+    ],
+    romaji: [
+        ['a', 'i', 'u', 'e', 'o'],
+        ['ka', 'ki', 'ku', 'ke', 'ko'],
+        ['sa', 'shi', 'su', 'se', 'so'],
+        ['ta', 'chi', 'tsu', 'te', 'to'],
+        ['na', 'ni', 'nu', 'ne', 'no'],
+        ['ha', 'hi', 'fu', 'he', 'ho'],
+        ['ma', 'mi', 'mu', 'me', 'mo'],
+        ['ya', 'yu', 'yo'],
+        ['ra', 'ri', 'ru', 're', 'ro'],
+        ['wa', 'wo', 'n']
+    ]
+};
+
 // Utility functions
-const createHiraganaToRomajiMap = () => {
+const createCharacterToRomajiMap = (data) => {
     const map = new Map();
-    hiraganaData.hiragana.forEach((row, i) => {
-        row.forEach((char, j) => map.set(char, hiraganaData.romaji[i][j]));
+    data[Object.keys(data)[0]].forEach((row, i) => {
+        row.forEach((char, j) => map.set(char, data.romaji[i][j]));
     });
     return map;
 };
@@ -46,17 +73,17 @@ const shuffleArray = (array) => {
     return shuffled;
 };
 
-// Hiragana Card Component
-const HiraganaCard = ({ char, onAnswerCheck }) => {
+// Character Card Component
+const CharacterCard = ({ char, onAnswerCheck, characterSet }) => {
     const [inputValue, setInputValue] = useState('');
     const [isCorrect, setIsCorrect] = useState(null);
     const inputRef = useRef(null);
 
-    const hiraganaToRomaji = createHiraganaToRomajiMap();
-    const correctRomaji = hiraganaToRomaji.get(char);
+    const characterToRomaji = createCharacterToRomajiMap(characterSet === 'hiragana' ? hiraganaData : katakanaData);
+    const correctRomaji = characterToRomaji.get(char);
 
     const handleInputChange = (e) => {
-        const value = e.target.value.replace(/\d/g, ''); // Filter out numbers
+        const value = e.target.value.replace(/\d/g, '');
         setInputValue(value);
     };
 
@@ -84,7 +111,7 @@ const HiraganaCard = ({ char, onAnswerCheck }) => {
     return (
         <div
             className={`hiragana-card ${isCorrect === true ? 'correct' : isCorrect === false ? 'incorrect' : ''}`}
-            data-hiragana={char}
+            data-character={char}
             onClick={handleClick}
         >
             <div className="hiragana-display">{char}</div>
@@ -108,18 +135,44 @@ const HiraganaCard = ({ char, onAnswerCheck }) => {
     );
 };
 
+// Tabs Component
+const Tabs = ({ activeTab, onTabChange, score, total }) => {
+    return (
+        <div className="tabs-container">
+            <div className="tabs">
+                <button 
+                    className={`tab-button ${activeTab === 'hiragana' ? 'active' : ''}`}
+                    onClick={() => onTabChange('hiragana')}
+                >
+                    平假名
+                </button>
+                <button 
+                    className={`tab-button ${activeTab === 'katakana' ? 'active' : ''}`}
+                    onClick={() => onTabChange('katakana')}
+                >
+                    片假名
+                </button>
+            </div>
+            <div className="score-display">
+                得分: {score}/{total}
+            </div>
+        </div>
+    );
+};
+
 // Main App Component
 const App = () => {
-    const [shuffledHiragana, setShuffledHiragana] = useState([]);
+    const [characterSet, setCharacterSet] = useState(() => localStorage.getItem('characterSet') || 'hiragana');
+    const [shuffledCharacters, setShuffledCharacters] = useState([]);
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [showWinMessage, setShowWinMessage] = useState(false);
-    const totalQuestions = hiraganaData.hiragana.flat().length;
+    const totalQuestions = (characterSet === 'hiragana' ? hiraganaData.hiragana : katakanaData.katakana).flat().length;
     const attemptsRef = useRef(new Map());
 
     const initializeGame = () => {
-        const allHiragana = hiraganaData.hiragana.flat();
-        const shuffled = shuffleArray(allHiragana);
-        setShuffledHiragana(shuffled);
+        const allCharacters = (characterSet === 'hiragana' ? hiraganaData.hiragana : katakanaData.katakana).flat();
+        const shuffled = shuffleArray(allCharacters);
+        setShuffledCharacters(shuffled);
         setCorrectAnswers(0);
         setShowWinMessage(false);
         const newAttempts = new Map();
@@ -131,10 +184,15 @@ const App = () => {
 
     useEffect(() => {
         initializeGame();
-    }, []);
+    }, [characterSet]);
 
-    const handleAnswerCheck = (hiragana, isCorrect) => {
-        const record = attemptsRef.current.get(hiragana);
+    const handleCharacterSetChange = (set) => {
+        setCharacterSet(set);
+        localStorage.setItem('characterSet', set);
+    };
+
+    const handleAnswerCheck = (character, isCorrect) => {
+        const record = attemptsRef.current.get(character);
         record.attempts++;
         if (isCorrect && !record.correct) {
             record.correct = true;
@@ -153,7 +211,7 @@ const App = () => {
         const cards = document.querySelectorAll('.hiragana-card');
         const activeElement = document.activeElement;
         const currentCard = activeElement ? activeElement.closest('.hiragana-card') : null;
-        console.log(currentCard);
+        
         if (currentCard) {
             const currentIndex = Array.from(cards).indexOf(currentCard);
             for (let i = currentIndex + 1; i < cards.length; i++) {
@@ -190,16 +248,23 @@ const App = () => {
 
     return (
         <>
-            <h1 className="page-title">平假名练习</h1>
+            <Tabs 
+                activeTab={characterSet} 
+                onTabChange={handleCharacterSetChange}
+                score={correctAnswers}
+                total={totalQuestions}
+            />
             <div className="container">
                 <div className="hiragana-area">
-                    {shuffledHiragana.map((char, index) => (
-                        <HiraganaCard key={index} char={char} onAnswerCheck={handleAnswerCheck} />
+                    {shuffledCharacters.map((char, index) => (
+                        <CharacterCard 
+                            key={index + characterSet} 
+                            char={char} 
+                            onAnswerCheck={handleAnswerCheck}
+                            characterSet={characterSet}
+                        />
                     ))}
                 </div>
-            </div>
-            <div className="score-display">
-                得分: {correctAnswers}/{totalQuestions}
             </div>
             <button className="reset-button" onClick={handleReset}>重置</button>
             {showWinMessage && (
@@ -208,7 +273,6 @@ const App = () => {
         </>
     );
 };
-
 
 // Render the app
 const root = ReactDOM.createRoot(document.getElementById('root')); // createRoot(container!) if you use TypeScript
