@@ -4,6 +4,9 @@
   "description": "一个简单的平假名练习应用，帮助用户学习日语平假名。",
   "main": "index.js",
   "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

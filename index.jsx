@@ -1,8 +1,8 @@
 const { useState, useEffect, useRef } = React;
 
-// Hiragana and Katakana Data Models
+// Hiragana, Katakana, Voiced Hiragana, and Voiced Katakana Data Models
 const hiraganaData = {
-    hiragana: [
+    characters: [
         ['あ', 'い', 'う', 'え', 'お'],
         ['か', 'き', 'く', 'け', 'こ'],
         ['さ', 'し', 'す', 'せ', 'そ'],
@@ -29,7 +29,7 @@ const hiraganaData = {
 };
 
 const katakanaData = {
-    katakana: [
+    characters: [
         ['ア', 'イ', 'ウ', 'エ', 'オ'],
         ['カ', 'キ', 'ク', 'ケ', 'コ'],
         ['サ', 'シ', 'ス', 'セ', 'ソ'],
@@ -55,10 +55,44 @@ const katakanaData = {
     ]
 };
 
+const voicedHiraganaData = {
+    characters: [
+        ['が', 'ぎ', 'ぐ', 'げ', 'ご'], // ga, gi, gu, ge, go
+        ['だ', 'ぢ', 'づ', 'で', 'ど'], // da, ji, zu, de, do
+        ['ざ', 'じ', 'ず', 'ぜ', 'ぞ'], // za, ji, zu, ze, zo
+        ['ば', 'び', 'ぶ', 'べ', 'ぼ'], // ba, bi, bu, be, bo
+        ['ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ']  // pa, pi, pu, pe, po
+    ],
+    romaji: [
+        ['ga', 'gi', 'gu', 'ge', 'go'],
+        ['da', 'ji', 'zu', 'de', 'do'],
+        ['za', 'ji', 'zu', 'ze', 'zo'],
+        ['ba', 'bi', 'bu', 'be', 'bo'],
+        ['pa', 'pi', 'pu', 'pe', 'po']
+    ]
+};
+
+const voicedKatakanaData = {
+    characters: [
+        ['ガ', 'ギ', 'グ', 'ゲ', 'ゴ'], // ga, gi, gu, ge, go
+        ['ダ', 'ヂ', 'ヅ', 'デ', 'ド'], // da, ji, zu, de, do
+        ['ザ', 'ジ', 'ズ', 'ゼ', 'ゾ'], // za, ji, zu, ze, zo
+        ['バ', 'ビ', 'ブ', 'ベ', 'ボ'], // ba, bi, bu, be, bo
+        ['パ', 'ピ', 'プ', 'ペ', 'ポ']  // pa, pi, pu, pe, po
+    ],
+    romaji: [
+        ['ga', 'gi', 'gu', 'ge', 'go'],
+        ['da', 'ji', 'zu', 'de', 'do'],
+        ['za', 'ji', 'zu', 'ze', 'zo'],
+        ['ba', 'bi', 'bu', 'be', 'bo'],
+        ['pa', 'pi', 'pu', 'pe', 'po']
+    ]
+};
+
 // Utility functions
 const createCharacterToRomajiMap = (data) => {
     const map = new Map();
-    data[Object.keys(data)[0]].forEach((row, i) => {
+    data.characters.forEach((row, i) => {
         row.forEach((char, j) => map.set(char, data.romaji[i][j]));
     });
     return map;
@@ -79,7 +113,11 @@ const CharacterCard = ({ char, onAnswerCheck, characterSet }) => {
     const [isCorrect, setIsCorrect] = useState(null);
     const inputRef = useRef(null);
 
-    const characterToRomaji = createCharacterToRomajiMap(characterSet === 'hiragana' ? hiraganaData : katakanaData);
+    const characterData = characterSet === 'hiragana' ? hiraganaData : 
+                         characterSet === 'katakana' ? katakanaData : 
+                         characterSet === 'voicedHiragana' ? voicedHiraganaData : 
+                         voicedKatakanaData;
+    const characterToRomaji = createCharacterToRomajiMap(characterData);
     const correctRomaji = characterToRomaji.get(char);
 
     const handleInputChange = (e) => {
@@ -152,6 +190,18 @@ const Tabs = ({ activeTab, onTabChange, score, total }) => {
                 >
                     片假名
                 </button>
+                <button 
+                    className={`tab-button ${activeTab === 'voicedHiragana' ? 'active' : ''}`}
+                    onClick={() => onTabChange('voicedHiragana')}
+                >
+                    平假名浊音/半浊音
+                </button>
+                <button 
+                    className={`tab-button ${activeTab === 'voicedKatakana' ? 'active' : ''}`}
+                    onClick={() => onTabChange('voicedKatakana')}
+                >
+                    片假名浊音/半浊音
+                </button>
             </div>
             <div className="score-display">
                 得分: {score}/{total}
@@ -166,11 +216,20 @@ const App = () => {
     const [shuffledCharacters, setShuffledCharacters] = useState([]);
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [showWinMessage, setShowWinMessage] = useState(false);
-    const totalQuestions = (characterSet === 'hiragana' ? hiraganaData.hiragana : katakanaData.katakana).flat().length;
+
+    const getCharacterData = () => {
+        if (characterSet === 'hiragana') return hiraganaData;
+        if (characterSet === 'katakana') return katakanaData;
+        if (characterSet === 'voicedHiragana') return voicedHiraganaData;
+        if (characterSet === 'voicedKatakana') return voicedKatakanaData;
+        return hiraganaData; // 默认值，防止 undefined
+    };
+
+    const totalQuestions = getCharacterData().characters.flat().length;
     const attemptsRef = useRef(new Map());
 
     const initializeGame = () => {
-        const allCharacters = (characterSet === 'hiragana' ? hiraganaData.hiragana : katakanaData.katakana).flat();
+        const allCharacters = getCharacterData().characters.flat();
         const shuffled = shuffleArray(allCharacters);
         setShuffledCharacters(shuffled);
         setCorrectAnswers(0);
@@ -198,7 +257,7 @@ const App = () => {
             record.correct = true;
             setCorrectAnswers(prev => prev + 1);
         }
-        if (correctAnswers === totalQuestions) {
+        if (correctAnswers + 1 === totalQuestions) {
             setShowWinMessage(true);
         }
     };
@@ -275,5 +334,5 @@ const App = () => {
 };
 
 // Render the app
-const root = ReactDOM.createRoot(document.getElementById('root')); // createRoot(container!) if you use TypeScript
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App tab="home" />);
