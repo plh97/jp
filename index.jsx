@@ -65,8 +65,8 @@ const voicedHiraganaData = {
     ],
     romaji: [
         ['ga', 'gi', 'gu', 'ge', 'go'],
-        ['da', 'ji', 'zu', 'de', 'do'],
-        ['za', 'ji', 'zu', 'ze', 'zo'],
+        ['da', 'di', 'zu', 'de', 'do'],
+        ['za', 'zi', 'zu', 'ze', 'zo'],
         ['ba', 'bi', 'bu', 'be', 'bo'],
         ['pa', 'pi', 'pu', 'pe', 'po']
     ]
@@ -82,8 +82,8 @@ const voicedKatakanaData = {
     ],
     romaji: [
         ['ga', 'gi', 'gu', 'ge', 'go'],
-        ['da', 'ji', 'zu', 'de', 'do'],
-        ['za', 'ji', 'zu', 'ze', 'zo'],
+        ['da', 'di', 'du', 'de', 'do'],
+        ['za', 'zi', 'zu', 'ze', 'zo'],
         ['ba', 'bi', 'bu', 'be', 'bo'],
         ['pa', 'pi', 'pu', 'pe', 'po']
     ]
